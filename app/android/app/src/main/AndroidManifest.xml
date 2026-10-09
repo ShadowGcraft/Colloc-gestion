@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- accès à Supabase (indispensable aussi en version release) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
-        android:label="colloc"
+        android:label="Colloc"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

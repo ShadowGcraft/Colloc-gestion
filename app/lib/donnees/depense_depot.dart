@@ -7,7 +7,11 @@ import 'fichiers.dart';
 
 abstract interface class DepenseDepot {
   /// Dépenses de la plus récente à la plus ancienne, par pages
-  Future<List<Depense>> depenses(String colocationId, {int debut = 0, int taille = 30});
+  Future<List<Depense>> depenses(
+    String colocationId, {
+    int debut = 0,
+    int taille = 30,
+  });
 
   /// Crée la dépense et ses parts en une seule transaction (RPC creer_depense)
   Future<String> creer(NouvelleDepense depense);
@@ -30,7 +34,11 @@ class DepenseDepotSupabase implements DepenseDepot {
   final UrlsSignees _urls;
 
   @override
-  Future<List<Depense>> depenses(String colocationId, {int debut = 0, int taille = 30}) async {
+  Future<List<Depense>> depenses(
+    String colocationId, {
+    int debut = 0,
+    int taille = 30,
+  }) async {
     final lignes = await _client
         .from('depenses')
         .select('*, parts:depense_parts(utilisateur_id, montant_centimes)')
@@ -58,16 +66,19 @@ class DepenseDepotSupabase implements DepenseDepot {
 
     // 2. la dépense et ses parts, en bloc
     try {
-      return await _client.rpc<String>('creer_depense', params: {
-        'p_colocation_id': d.colocationId,
-        'p_payeur_id': d.payeurId,
-        'p_montant_centimes': d.montantCentimes,
-        'p_description': d.description.trim(),
-        'p_date': dateVersSql(d.date),
-        'p_participants': d.participants,
-        'p_montants': d.montantsPersonnalises,
-        'p_ticket_chemin': chemin,
-      });
+      return await _client.rpc<String>(
+        'creer_depense',
+        params: {
+          'p_colocation_id': d.colocationId,
+          'p_payeur_id': d.payeurId,
+          'p_montant_centimes': d.montantCentimes,
+          'p_description': d.description.trim(),
+          'p_date': dateVersSql(d.date),
+          'p_participants': d.participants,
+          'p_montants': d.montantsPersonnalises,
+          'p_ticket_chemin': chemin,
+        },
+      );
     } catch (_) {
       if (chemin != null) await supprimerSansErreur(_client, 'tickets', chemin);
       rethrow;
@@ -86,7 +97,10 @@ class DepenseDepotSupabase implements DepenseDepot {
 
   @override
   Future<List<Solde>> soldes(String colocationId) async {
-    final lignes = await _client.from('soldes').select().eq('colocation_id', colocationId);
+    final lignes = await _client
+        .from('soldes')
+        .select()
+        .eq('colocation_id', colocationId);
     return lignes.map(Solde.depuisJson).toList();
   }
 
@@ -118,9 +132,11 @@ class DepenseDepotSupabase implements DepenseDepot {
   Future<List<Depense>> resumePourStatistiques(String colocationId) async {
     final lignes = await _client
         .from('depenses')
-        .select('id, payeur_id, montant_centimes, description, date_depense, cree_par')
+        .select(
+          'id, payeur_id, montant_centimes, description, date_depense, cree_par',
+        )
         .eq('colocation_id', colocationId)
-        .order('date_depense')
+        .order('date_depense', ascending: false) // les 5000 plus récentes
         .limit(5000);
     return lignes.map(Depense.depuisJson).toList();
   }

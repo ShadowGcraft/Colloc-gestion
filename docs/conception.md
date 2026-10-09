@@ -2,7 +2,7 @@
 
 Ce dossier contient les livrables à faire valider **avant d'écrire du code Flutter** :
 
-1. le schéma de la base de données (diagramme ci-dessous + script [`supabase/schema.sql`](../supabase/schema.sql)) ;
+1. le schéma de la base de données (diagramme ci-dessous + script [`supabase/migrations/20261009000000_schema_initial.sql`](../supabase/migrations/20261009000000_schema_initial.sql)) ;
 2. la matrice d'autorisations ;
 3. les 5 écrans clés et le graphe de navigation (les maquettes, elles, se font sur papier) ;
 4. le découpage en tâches.
@@ -190,19 +190,19 @@ La redirection est **automatique** : l'application écoute `onAuthStateChange` e
 
 ## 4. Découpage en tâches
 
-> Remplacez « Prénom N » par vos prénoms et ajustez au nombre de membres du groupe. Chacun commite **ses** fonctionnalités, avec des commits réguliers : l'historique Git est noté.
+> Proposition de répartition, à ajuster entre vous. Chacun commite **ses** fonctionnalités, régulièrement : l'historique Git est noté par personne.
 
 | Lot | Contenu | Responsable | Étape |
 |---|---|---|---|
-| Base de données | Relecture de `schema.sql`, création du projet Supabase, test `curl` du jalon 2 | Prénom 1 | 1–2 |
-| Socle Flutter | `flutter create`, structure des dossiers, `config.dart`, modèles, repositories, thèmes clair/sombre | Prénom 2 | 2 |
-| Comptes | Inscription, connexion, redirection automatique, profil + avatar | Prénom 3 | 2 |
-| Colocations | Créer, rejoindre par code, basculer, paramètres (membres, code, quitter) | Prénom 1 | 2 |
-| Dépenses | Formulaire (répartition égale ou personnalisée), photo du ticket, liste | Prénom 2 | 3 |
-| Soldes | Écran Soldes, simplification des dettes + tests unitaires, remboursements, jeu de test du jalon 3 | Prénom 3 | 3 |
-| Tâches | Liste, création, « fait », historique, indicateur de retard | Prénom 1 | 4 |
-| Courses | Liste en temps réel, qui a ajouté ou coché quoi | Prénom 2 | 4 |
-| Chat | Temps réel, pagination, nouveaux messages | Prénom 3 | 4 |
-| Robustesse | Widgets communs (chargement, vide, erreur), bandeau hors connexion, reconnexion Realtime | tous | 4–5 |
-| Qualité | 5 tests automatisés minimum, audit de sécurité croisé, soutenance | tous | 5 |
-| Suivi | `JOURNAL.md` à chaque séance, `DECISIONS.md` à chaque choix | tous | continu |
+| Base de données | Schéma, contraintes, RLS, RPC, Storage, données de démo, tests pgTAP, test `curl` du jalon 2 | Louis HERZOG | 1–2 |
+| Socle Flutter | Structure des dossiers, `config.dart`, modèles, dépôts, thèmes clair/sombre, widgets communs | Romain AUBREE | 2 |
+| Comptes et colocations | Inscription, connexion, redirection automatique, profil et avatar ; créer, rejoindre, basculer ; paramètres (membres, code, quitter) | Louis HERZOG | 2 |
+| Dépenses | Formulaire (parts égales ou personnalisées), photo du ticket, liste paginée, détail | Louis HERZOG | 3 |
+| Soldes | Vue SQL, simplification des dettes + tests unitaires, remboursements, jeu de test du jalon 3 | Louis HERZOG | 3 |
+| Tâches | Liste en temps réel, « fait » (rotation), historique, indicateur de retard | Romain AUBREE | 4 |
+| Courses | Liste en temps réel, qui a ajouté ou coché quoi | Romain AUBREE | 4 |
+| Chat | Temps réel, pagination par clé, nouveaux messages et non-lus | Romain AUBREE | 4 |
+| Robustesse | Mode hors connexion, resynchronisation, états vide / chargement / erreur | Romain AUBREE | 4–5 |
+| Bonus | Écran Statistiques | Romain AUBREE | 5 |
+| Qualité | Tests de widgets et d'intégration, répétition du jalon 4, audit croisé, soutenance | les deux | 5 |
+| Suivi | `JOURNAL.md` à chaque séance, `DECISIONS.md` à chaque choix | les deux | continu |

@@ -16,10 +16,13 @@ class UrlsSignees {
   Future<String> pour(String bucket, String chemin) async {
     final cle = '$bucket/$chemin';
     final enCache = _cache[cle];
-    if (enCache != null && enCache.$2.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
+    if (enCache != null &&
+        enCache.$2.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
       return enCache.$1;
     }
-    final url = await _client.storage.from(bucket).createSignedUrl(chemin, _duree.inSeconds);
+    final url = await _client.storage
+        .from(bucket)
+        .createSignedUrl(chemin, _duree.inSeconds);
     _cache[cle] = (url, DateTime.now().add(_duree));
     return url;
   }
@@ -38,7 +41,9 @@ Future<String> envoyerImage(
     _ => 'jpg',
   };
   final chemin = '$dossier/${nouvelIdentifiant()}.$extension';
-  await client.storage.from(bucket).uploadBinary(
+  await client.storage
+      .from(bucket)
+      .uploadBinary(
         chemin,
         Uint8List.fromList(octets),
         fileOptions: FileOptions(contentType: typeMime),
@@ -47,7 +52,11 @@ Future<String> envoyerImage(
 }
 
 /// Supprime un fichier sans faire échouer l'action principale (simple ménage).
-Future<void> supprimerSansErreur(SupabaseClient client, String bucket, String chemin) async {
+Future<void> supprimerSansErreur(
+  SupabaseClient client,
+  String bucket,
+  String chemin,
+) async {
   try {
     await client.storage.from(bucket).remove([chemin]);
   } catch (_) {

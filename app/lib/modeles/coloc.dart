@@ -5,10 +5,10 @@ class Profil {
   const Profil({required this.id, required this.pseudo, this.avatarChemin});
 
   factory Profil.depuisJson(Map<String, dynamic> json) => Profil(
-        id: json['id'] as String,
-        pseudo: json['pseudo'] as String,
-        avatarChemin: json['avatar_chemin'] as String?,
-      );
+    id: json['id'] as String,
+    pseudo: json['pseudo'] as String,
+    avatarChemin: json['avatar_chemin'] as String?,
+  );
 
   final String id;
   final String pseudo;
@@ -44,7 +44,8 @@ class Colocation {
   bool get suisAdmin => monRole == Role.admin;
 
   /// « GAPDE-MXV27 » : plus facile à dicter (la base accepte avec ou sans tiret)
-  String get codeLisible => '${codeInvitation.substring(0, 5)}-${codeInvitation.substring(5)}';
+  String get codeLisible =>
+      '${codeInvitation.substring(0, 5)}-${codeInvitation.substring(5)}';
 }
 
 class Membre {
@@ -67,7 +68,9 @@ class Membre {
       avatarChemin: profil?['avatar_chemin'] as String?,
       role: Role.values.byName(json['role'] as String),
       rejointLe: DateTime.parse(json['rejoint_le'] as String),
-      partiLe: json['parti_le'] == null ? null : DateTime.parse(json['parti_le'] as String),
+      partiLe: json['parti_le'] == null
+          ? null
+          : DateTime.parse(json['parti_le'] as String),
       dernierMessageLuId: (json['dernier_message_lu_id'] as num?)?.toInt(),
     );
   }

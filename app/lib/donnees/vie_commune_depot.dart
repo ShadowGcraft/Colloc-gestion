@@ -41,8 +41,8 @@ class TacheDepotSupabase implements TacheDepot {
         .from('taches')
         .select()
         .eq('colocation_id', colocationId)
-        .order('prochaine_echeance')
-        .order('titre');
+        .order('prochaine_echeance', ascending: true)
+        .order('titre', ascending: true);
     return lignes.map(Tache.depuisJson).toList();
   }
 
@@ -53,22 +53,25 @@ class TacheDepotSupabase implements TacheDepot {
     required Frequence frequence,
     required String responsableId,
     required DateTime premiereEcheance,
-  }) =>
-      _client.from('taches').insert({
-        'colocation_id': colocationId,
-        'titre': titre.trim(),
-        'frequence': frequence.name,
-        'responsable_id': responsableId,
-        'prochaine_echeance': dateVersSql(premiereEcheance),
-      });
+  }) => _client.from('taches').insert({
+    'colocation_id': colocationId,
+    'titre': titre.trim(),
+    'frequence': frequence.name,
+    'responsable_id': responsableId,
+    'prochaine_echeance': dateVersSql(premiereEcheance),
+  });
 
   @override
   Future<Tache> terminer(String tacheId) async => Tache.depuisJson(
-        await _client.rpc<Map<String, dynamic>>('terminer_tache', params: {'p_tache_id': tacheId}),
-      );
+    await _client.rpc<Map<String, dynamic>>(
+      'terminer_tache',
+      params: {'p_tache_id': tacheId},
+    ),
+  );
 
   @override
-  Future<void> supprimer(String tacheId) => _client.from('taches').delete().eq('id', tacheId);
+  Future<void> supprimer(String tacheId) =>
+      _client.from('taches').delete().eq('id', tacheId);
 
   @override
   Future<List<RealisationTache>> historique(String tacheId) async {
@@ -82,7 +85,8 @@ class TacheDepotSupabase implements TacheDepot {
   }
 
   @override
-  Ecoute ecouter(String colocationId, Rappels<Tache> r) => EcouteSupabase<Tache>(
+  Ecoute ecouter(String colocationId, Rappels<Tache> r) =>
+      EcouteSupabase<Tache>(
         _client,
         table: 'taches',
         colocationId: colocationId,
@@ -97,7 +101,11 @@ class TacheDepotSupabase implements TacheDepot {
 
 abstract interface class CoursesDepot {
   Future<List<ArticleCourse>> articles(String colocationId);
-  Future<ArticleCourse> ajouter(String colocationId, String libelle, String? quantite);
+  Future<ArticleCourse> ajouter(
+    String colocationId,
+    String libelle,
+    String? quantite,
+  );
 
   /// « coché par » est rempli par la base (trigger), pas par l'application
   Future<ArticleCourse> cocher(String articleId, bool coche);
@@ -116,32 +124,47 @@ class CoursesDepotSupabase implements CoursesDepot {
         .from('articles_courses')
         .select()
         .eq('colocation_id', colocationId)
-        .order('ajoute_le');
+        .order('ajoute_le', ascending: true);
     return lignes.map(ArticleCourse.depuisJson).toList();
   }
 
   @override
-  Future<ArticleCourse> ajouter(String colocationId, String libelle, String? quantite) async =>
-      ArticleCourse.depuisJson(await _client
-          .from('articles_courses')
-          .insert({
-            'colocation_id': colocationId,
-            'libelle': libelle.trim(),
-            'quantite': (quantite?.trim().isEmpty ?? true) ? null : quantite!.trim(),
-          })
-          .select()
-          .single());
+  Future<ArticleCourse> ajouter(
+    String colocationId,
+    String libelle,
+    String? quantite,
+  ) async => ArticleCourse.depuisJson(
+    await _client
+        .from('articles_courses')
+        .insert({
+          'colocation_id': colocationId,
+          'libelle': libelle.trim(),
+          'quantite': (quantite?.trim().isEmpty ?? true)
+              ? null
+              : quantite!.trim(),
+        })
+        .select()
+        .single(),
+  );
 
   @override
-  Future<ArticleCourse> cocher(String articleId, bool coche) async => ArticleCourse.depuisJson(
-      await _client.from('articles_courses').update({'coche': coche}).eq('id', articleId).select().single());
+  Future<ArticleCourse> cocher(String articleId, bool coche) async =>
+      ArticleCourse.depuisJson(
+        await _client
+            .from('articles_courses')
+            .update({'coche': coche})
+            .eq('id', articleId)
+            .select()
+            .single(),
+      );
 
   @override
   Future<void> supprimer(List<String> articleIds) =>
       _client.from('articles_courses').delete().inFilter('id', articleIds);
 
   @override
-  Ecoute ecouter(String colocationId, Rappels<ArticleCourse> r) => EcouteSupabase<ArticleCourse>(
+  Ecoute ecouter(String colocationId, Rappels<ArticleCourse> r) =>
+      EcouteSupabase<ArticleCourse>(
         _client,
         table: 'articles_courses',
         colocationId: colocationId,
@@ -157,7 +180,11 @@ class CoursesDepotSupabase implements CoursesDepot {
 abstract interface class ChatDepot {
   /// Messages du plus récent au plus ancien. [avantId] : pagination « par clé »
   /// (on demande les messages plus anciens que le dernier affiché).
-  Future<List<Message>> messages(String colocationId, {int? avantId, int limite = 30});
+  Future<List<Message>> messages(
+    String colocationId, {
+    int? avantId,
+    int limite = 30,
+  });
   Future<Message> envoyer(String colocationId, String contenu);
   Future<void> supprimer(int messageId);
 
@@ -175,23 +202,33 @@ class ChatDepotSupabase implements ChatDepot {
   String get _moi => _client.auth.currentUser!.id;
 
   @override
-  Future<List<Message>> messages(String colocationId, {int? avantId, int limite = 30}) async {
-    var requete = _client.from('messages').select().eq('colocation_id', colocationId);
+  Future<List<Message>> messages(
+    String colocationId, {
+    int? avantId,
+    int limite = 30,
+  }) async {
+    var requete = _client
+        .from('messages')
+        .select()
+        .eq('colocation_id', colocationId);
     if (avantId != null) requete = requete.lt('id', avantId);
     final lignes = await requete.order('id', ascending: false).limit(limite);
     return lignes.map(Message.depuisJson).toList();
   }
 
   @override
-  Future<Message> envoyer(String colocationId, String contenu) async => Message.depuisJson(
-      await _client
-          .from('messages')
-          .insert({'colocation_id': colocationId, 'contenu': contenu.trim()})
-          .select()
-          .single());
+  Future<Message> envoyer(String colocationId, String contenu) async =>
+      Message.depuisJson(
+        await _client
+            .from('messages')
+            .insert({'colocation_id': colocationId, 'contenu': contenu.trim()})
+            .select()
+            .single(),
+      );
 
   @override
-  Future<void> supprimer(int messageId) => _client.from('messages').delete().eq('id', messageId);
+  Future<void> supprimer(int messageId) =>
+      _client.from('messages').delete().eq('id', messageId);
 
   @override
   Future<int?> dernierLu(String colocationId) async {
@@ -227,7 +264,8 @@ class ChatDepotSupabase implements ChatDepot {
   }
 
   @override
-  Ecoute ecouter(String colocationId, Rappels<Message> r) => EcouteSupabase<Message>(
+  Ecoute ecouter(String colocationId, Rappels<Message> r) =>
+      EcouteSupabase<Message>(
         _client,
         table: 'messages',
         colocationId: colocationId,

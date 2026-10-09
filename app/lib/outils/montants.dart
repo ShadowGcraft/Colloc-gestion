@@ -24,7 +24,8 @@ String formaterEuros(int centimes, {bool signe = false}) {
 /// Renvoie null si la saisie n'est pas un montant valide (plus de 2 décimales, lettres…).
 int? lireMontant(String saisie) {
   final texte = saisie.replaceAll(RegExp(r'[\s  €]'), '').replaceAll(',', '.');
-  final correspondance = RegExp(r'^(\d{1,7})(?:\.(\d{1,2}))?$').firstMatch(texte);
+  final correspondance = RegExp(r'^(\d{1,7})(?:\.(\d{1,2}))?$')
+      .firstMatch(texte);
   if (correspondance == null) return null;
 
   final euros = int.parse(correspondance.group(1)!);

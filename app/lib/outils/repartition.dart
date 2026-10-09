@@ -3,7 +3,10 @@
 ///
 /// Les centimes restants vont, un par un, aux premiers participants triés par
 /// identifiant : 1000 centimes entre 3 → 334, 333, 333.
-Map<String, int> repartirEgalement(int totalCentimes, Iterable<String> participants) {
+Map<String, int> repartirEgalement(
+  int totalCentimes,
+  Iterable<String> participants,
+) {
   final tries = participants.toSet().toList()..sort();
   if (tries.isEmpty) return {};
 

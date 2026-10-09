@@ -22,13 +22,13 @@ class Tache {
   });
 
   factory Tache.depuisJson(Map<String, dynamic> json) => Tache(
-        id: json['id'] as String,
-        titre: json['titre'] as String,
-        frequence: Frequence.values.byName(json['frequence'] as String),
-        responsableId: json['responsable_id'] as String,
-        prochaineEcheance: DateTime.parse(json['prochaine_echeance'] as String),
-        creePar: json['cree_par'] as String,
-      );
+    id: json['id'] as String,
+    titre: json['titre'] as String,
+    frequence: Frequence.values.byName(json['frequence'] as String),
+    responsableId: json['responsable_id'] as String,
+    prochaineEcheance: DateTime.parse(json['prochaine_echeance'] as String),
+    creePar: json['cree_par'] as String,
+  );
 
   final String id;
   final String titre;
@@ -49,7 +49,8 @@ class RealisationTache {
     required this.faitLe,
   });
 
-  factory RealisationTache.depuisJson(Map<String, dynamic> json) => RealisationTache(
+  factory RealisationTache.depuisJson(Map<String, dynamic> json) =>
+      RealisationTache(
         faitPar: json['fait_par'] as String,
         responsablePrevu: json['responsable_prevu'] as String,
         echeance: DateTime.parse(json['echeance'] as String),
@@ -76,14 +77,14 @@ class ArticleCourse {
   });
 
   factory ArticleCourse.depuisJson(Map<String, dynamic> json) => ArticleCourse(
-        id: json['id'] as String,
-        libelle: json['libelle'] as String,
-        quantite: json['quantite'] as String?,
-        ajoutePar: json['ajoute_par'] as String,
-        ajouteLe: DateTime.parse(json['ajoute_le'] as String),
-        coche: json['coche'] as bool,
-        cochePar: json['coche_par'] as String?,
-      );
+    id: json['id'] as String,
+    libelle: json['libelle'] as String,
+    quantite: json['quantite'] as String?,
+    ajoutePar: json['ajoute_par'] as String,
+    ajouteLe: DateTime.parse(json['ajoute_le'] as String),
+    coche: json['coche'] as bool,
+    cochePar: json['coche_par'] as String?,
+  );
 
   final String id;
   final String libelle;
@@ -95,14 +96,14 @@ class ArticleCourse {
 
   /// Copie utilisée pour cocher immédiatement à l'écran, avant la réponse du serveur
   ArticleCourse avecCoche(bool valeur, String? par) => ArticleCourse(
-        id: id,
-        libelle: libelle,
-        quantite: quantite,
-        ajoutePar: ajoutePar,
-        ajouteLe: ajouteLe,
-        coche: valeur,
-        cochePar: valeur ? par : null,
-      );
+    id: id,
+    libelle: libelle,
+    quantite: quantite,
+    ajoutePar: ajoutePar,
+    ajouteLe: ajouteLe,
+    coche: valeur,
+    cochePar: valeur ? par : null,
+  );
 }
 
 class Message {
@@ -114,11 +115,11 @@ class Message {
   });
 
   factory Message.depuisJson(Map<String, dynamic> json) => Message(
-        id: (json['id'] as num).toInt(),
-        auteurId: json['auteur_id'] as String,
-        contenu: json['contenu'] as String,
-        envoyeLe: DateTime.parse(json['envoye_le'] as String),
-      );
+    id: (json['id'] as num).toInt(),
+    auteurId: json['auteur_id'] as String,
+    contenu: json['contenu'] as String,
+    envoyeLe: DateTime.parse(json['envoye_le'] as String),
+  );
 
   final int id;
   final String auteurId;

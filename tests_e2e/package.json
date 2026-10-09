@@ -1,0 +1,12 @@
+{
+  "name": "colloc-tests-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Répétition automatique du jalon 4 (Playwright + Firefox)",
+  "scripts": {
+    "jalon4": "node jalon4.mjs captures"
+  },
+  "devDependencies": {
+    "playwright": "1.48.2"
+  }
+}

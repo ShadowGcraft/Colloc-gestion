@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Colloc'",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "app",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define-from-file=../env.json"]
+    },
+    {
+      "name": "Colloc' (Windows bureau)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "app",
+      "program": "lib/main.dart",
+      "deviceId": "windows",
+      "toolArgs": ["--dart-define-from-file=../env.json"]
+    }
+  ]
+}

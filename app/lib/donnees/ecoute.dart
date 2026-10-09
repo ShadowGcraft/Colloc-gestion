@@ -1,6 +1,8 @@
 /// Abonnements temps réel (Supabase Realtime), limités à une colocation.
 library;
 
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Évènement reçu sur une table suivie en temps réel.
@@ -80,7 +82,9 @@ class EcouteSupabase<T> implements Ecoute {
             case RealtimeSubscribeStatus.subscribed:
               if (_dejaConnecte) surReconnexion?.call();
               _dejaConnecte = true;
-            case RealtimeSubscribeStatus.channelError || RealtimeSubscribeStatus.timedOut:
+              if (!_pret.isCompleted) _pret.complete();
+            case RealtimeSubscribeStatus.channelError ||
+                RealtimeSubscribeStatus.timedOut:
               surCoupure?.call();
             case RealtimeSubscribeStatus.closed:
               break;
@@ -93,6 +97,10 @@ class EcouteSupabase<T> implements Ecoute {
   final SupabaseClient _client;
   late final RealtimeChannel _canal;
   var _dejaConnecte = false;
+  final _pret = Completer<void>();
+
+  /// Se termine quand le serveur a confirmé l'abonnement
+  Future<void> get pret => _pret.future;
 
   @override
   Future<void> fermer() => _client.removeChannel(_canal);

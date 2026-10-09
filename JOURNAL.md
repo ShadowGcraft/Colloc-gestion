@@ -5,19 +5,14 @@
 
 ---
 
-## Séance du 09/10/2026 — Étape 1 : conception
+## Séance du 09/10/2026
 
-### Prénom 1
+### Louis HERZOG
 - **Fait :**
 - **Difficulté :**
 - **Solution :**
 
-### Prénom 2
-- **Fait :**
-- **Difficulté :**
-- **Solution :**
-
-### Prénom 3
+### Romain AUBREE
 - **Fait :**
 - **Difficulté :**
 - **Solution :**
@@ -28,7 +23,12 @@
 
 ## Séance du JJ/MM/AAAA — Étape N : sujet
 
-### Prénom
+### Louis HERZOG
+- **Fait :**
+- **Difficulté :**
+- **Solution :**
+
+### Romain AUBREE
 - **Fait :**
 - **Difficulté :**
 - **Solution :**

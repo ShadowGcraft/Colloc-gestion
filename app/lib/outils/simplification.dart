@@ -18,7 +18,10 @@ class Virement {
 
   @override
   bool operator ==(Object other) =>
-      other is Virement && other.de == de && other.vers == vers && other.montant == montant;
+      other is Virement &&
+      other.de == de &&
+      other.vers == vers &&
+      other.montant == montant;
 
   @override
   int get hashCode => Object.hash(de, vers, montant);
@@ -35,7 +38,9 @@ const tailleMaxRechercheExacte = 15;
 List<Virement> simplifierDettes(Map<String, int> soldes) {
   final somme = soldes.values.fold(0, (a, b) => a + b);
   if (somme != 0) {
-    throw ArgumentError('La somme des soldes doit valoir 0 (elle vaut $somme).');
+    throw ArgumentError(
+      'La somme des soldes doit valoir 0 (elle vaut $somme).',
+    );
   }
 
   // ordre stable : le résultat ne dépend pas de l'ordre de la Map
@@ -50,7 +55,10 @@ List<Virement> simplifierDettes(Map<String, int> soldes) {
 }
 
 /// Découpe [ids] en un nombre maximal de groupes dont la somme vaut 0.
-List<List<String>> _groupesASommeNulle(List<String> ids, Map<String, int> soldes) {
+List<List<String>> _groupesASommeNulle(
+  List<String> ids,
+  Map<String, int> soldes,
+) {
   final n = ids.length;
   final total = 1 << n;
 
@@ -109,9 +117,13 @@ List<Virement> _reglerGroupe(List<String> groupe, Map<String, int> soldes) {
 
     final debiteur = enAttente.reduce((a, b) => b.value < a.value ? b : a);
     final crediteur = enAttente.reduce((a, b) => b.value > a.value ? b : a);
-    final montant = (-debiteur.value) < crediteur.value ? -debiteur.value : crediteur.value;
+    final montant = (-debiteur.value) < crediteur.value
+        ? -debiteur.value
+        : crediteur.value;
 
-    virements.add(Virement(de: debiteur.key, vers: crediteur.key, montant: montant));
+    virements.add(
+      Virement(de: debiteur.key, vers: crediteur.key, montant: montant),
+    );
     restant[debiteur.key] = debiteur.value + montant;
     restant[crediteur.key] = crediteur.value - montant;
   }

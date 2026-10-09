@@ -8,10 +8,13 @@ import '../donnees/erreurs.dart';
 /// l'application passe hors ligne (bandeau affiché), puis sonde le serveur
 /// régulièrement. Au retour du réseau, les écrans ouverts se rechargent.
 class EtatReseau extends ChangeNotifier {
-  EtatReseau({required Future<void> Function() sonde, this.intervalle = const Duration(seconds: 4)})
-      : _sonde = sonde;
+  EtatReseau({
+    required this.sonde,
+    this.intervalle = const Duration(seconds: 4),
+  });
 
-  final Future<void> Function() _sonde;
+  /// Petite requête qui réussit si le serveur est joignable
+  final Future<void> Function() sonde;
   final Duration intervalle;
 
   bool _enLigne = true;
@@ -33,10 +36,11 @@ class EtatReseau extends ChangeNotifier {
   /// Vérifie tout de suite (ex. quand le temps réel signale une coupure).
   Future<void> verifier() async {
     try {
-      await _sonde();
+      await sonde();
       signalerSucces();
     } catch (e) {
-      signalerErreur(e);
+      // une réponse d'erreur du serveur (401, 403…) prouve quand même qu'il est joignable
+      estErreurReseau(e) ? signalerErreur(e) : signalerSucces();
     }
   }
 

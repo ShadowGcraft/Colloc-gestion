@@ -18,3 +18,7 @@ desktop.ini
 *.iml
 
 # Les fichiers propres à Flutter sont ignorés par app/.gitignore (créé par flutter create)
+
+# ---- Tests de bout en bout (Node / Playwright) ----
+tests_e2e/node_modules/
+tests_e2e/captures/

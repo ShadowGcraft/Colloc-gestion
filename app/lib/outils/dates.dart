@@ -3,8 +3,18 @@ library;
 
 const _jours = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
 const _mois = [
-  'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.',
+  'janv.',
+  'févr.',
+  'mars',
+  'avr.',
+  'mai',
+  'juin',
+  'juil.',
+  'août',
+  'sept.',
+  'oct.',
+  'nov.',
+  'déc.',
 ];
 
 DateTime jourSeul(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -32,8 +42,11 @@ String formaterEcheance(DateTime echeance) {
 /// « 14:05 » pour aujourd'hui, sinon « lun. 12 oct., 14:05 »
 String formaterHorodatage(DateTime d) {
   final local = d.toLocal();
-  final heure = '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-  return jourSeul(local) == aujourdhui() ? heure : '${formaterDate(local)}, $heure';
+  final heure =
+      '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  return jourSeul(local) == aujourdhui()
+      ? heure
+      : '${formaterDate(local)}, $heure';
 }
 
 String nomDuMois(int mois) => _mois[mois - 1];

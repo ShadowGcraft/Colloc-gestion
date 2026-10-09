@@ -1,8 +1,8 @@
 # Décisions d'architecture
 
-> **Statut : propositions à relire et valider en groupe avant le jalon 1.**
 > Format : pour chaque choix important, 3 à 5 lignes (options envisagées, choix, raison).
-> Le schéma correspondant est dans [`supabase/schema.sql`](supabase/schema.sql) et le dossier de conception dans [`docs/conception.md`](docs/conception.md).
+> Schéma : [`supabase/migrations/20261009000000_schema_initial.sql`](supabase/migrations/20261009000000_schema_initial.sql). Conception : [`docs/conception.md`](docs/conception.md).
+> **À relire ensemble et à savoir défendre à l'oral** : chaque choix ci-dessous peut être questionné en soutenance.
 
 ## Modèle de données
 
@@ -40,30 +40,47 @@
 
 ### D7 — Structure du dépôt
 - **Options :** projet Flutter à la racine ; projet Flutter dans un sous-dossier.
-- **Choix :** `app/` (Flutter), `supabase/` (SQL), `docs/` (conception), avec les lanceurs, `JOURNAL.md` et `DECISIONS.md` à la racine.
+- **Choix :** `app/` (Flutter), `supabase/` (projet Supabase CLI : migration, données de démo, tests SQL), `docs/` (conception), `tests_e2e/` (scénario du jalon 4), avec les lanceurs, `JOURNAL.md` et `DECISIONS.md` à la racine.
 - **Raison :** chacun trouve sa partie et les fichiers de l'application ne se mélangent pas avec la doc et la base.
 
-### D8 — Gestion d'état ⏳ *à trancher à l'étape 2*
+### D8 — Gestion d'état
 - **Options :** `setState` seul ; `ChangeNotifier` + `ListenableBuilder` (inclus dans Flutter) ; `provider` ; Riverpod ; Bloc.
-- **Proposition :** `ChangeNotifier` par écran (ViewModel) + des repositories. C'est l'architecture recommandée par la documentation officielle de Flutter, et elle ne demande **aucun package** (la règle 1 n'autorise que `supabase_flutter` comme point de départ).
-- **Raison :** simple et suffisant pour ce projet. Si le TP Flutter utilisait `provider`, on garde `provider`. À valider avec le prof pour les autres packages (`image_picker` pour la photo du ticket, par exemple).
+- **Choix :** un ViewModel `ChangeNotifier` par écran (classe de base `ModeleVue` : chargement, erreur, rechargement au retour du réseau) et une `Session` partagée (profil, coloc courante, membres), fournie par un `InheritedWidget` (`ServicesScope`).
+- **Raison :** c'est l'architecture recommandée par la documentation officielle de Flutter, et elle n'ajoute **aucun package** : seuls `supabase_flutter` et `image_picker` (photo du ticket) sont utilisés. Les écrans restent simples à tester.
 
-### D9 — Couche d'accès aux données et dossiers ⏳ *à confirmer à l'étape 2*
-- **Choix proposé :**
-  ```
-  app/lib/
-    main.dart, config.dart   # lecture de SUPABASE_URL / SUPABASE_ANON_KEY
-    modeles/                 # classes Dart immuables (fromJson) : Depense, Membre…
-    donnees/                 # repositories : SEUL endroit qui appelle Supabase
-    vues/<fonctionnalite>/   # écrans + ViewModel (ChangeNotifier)
-    widgets/                 # communs : Chargement, EtatVide, EtatErreur, BandeauHorsLigne
-    outils/                  # simplification des dettes, formatage des montants
-  ```
-- **Raison :** l'interface ne connaît jamais Supabase, ce qui permet de tester les écrans avec de faux repositories (tests de widgets) et évite la duplication.
+### D9 — Couche d'accès aux données et dossiers
+- **Options :** appeler Supabase directement depuis les écrans ; une couche « dépôts » (repositories).
+- **Choix :** une interface par domaine (`DepenseDepot`, `ChatDepot`…) avec son implémentation Supabase, regroupées dans `Depots`. Les écrans ne connaissent que les interfaces. Dossiers : `modeles/`, `donnees/`, `etat/`, `vues/<fonctionnalité>/`, `widgets/`, `outils/`.
+- **Raison :** aucun écran n'importe Supabase. Les tests de widgets remplacent les dépôts par des faux en mémoire (`test/faux_depots.dart`), et une même logique n'est jamais écrite deux fois.
 
 ### D10 — Clés et configuration
 - **Choix :** l'URL et la clé **anon** sont dans `env.json` (ignoré par Git) et sont passées par `--dart-define-from-file`. Les lanceurs le font automatiquement. La clé `service_role` n'est **jamais** utilisée : les lanceurs refusent de démarrer s'ils la détectent.
 - **Raison :** la clé anon est publique par nature, et c'est la RLS qui protège les données. On la garde quand même hors du dépôt : chacun peut pointer vers son propre projet Supabase.
+
+### D11 — Mode hors connexion
+- **Options :** paquet `connectivity_plus` ; détection par les erreurs réseau des requêtes.
+- **Choix :** un `EtatReseau` global. Toute erreur réseau le fait passer hors ligne (bandeau en haut de l'écran), puis il sonde le serveur toutes les 4 secondes. Au retour, chaque écran ouvert se recharge tout seul.
+- **Raison :** savoir que le Wi-Fi est allumé ne prouve pas que Supabase est joignable : seule une vraie requête le prouve. Les données déjà affichées restent visibles, et la saisie d'un message ou d'un article non envoyé est conservée.
+
+### D12 — Temps réel : resynchroniser plutôt que faire confiance
+- **Choix :** chaque écran temps réel (courses, chat, tâches) charge d'abord ses données, puis applique les évènements reçus. **À chaque reconnexion du canal, il recharge tout.** Un canal est ouvert dans `initState()` et fermé dans `dispose()`.
+- **Raison :** Realtime n'est pas une garantie de livraison. Pendant une coupure, les évènements sont perdus, et nous avons constaté que le tout premier abonnement après un redémarrage de Supabase peut en manquer. Le rechargement à la reconnexion rattrape tout, ce que le jalon 4 vérifie.
+
+### D13 — Stratégie de tests
+- **Choix :** quatre niveaux. Unitaires (calculs), widgets (formulaires, et tous les écrans en clair et en sombre pour détecter les débordements), intégration (dépôts contre le vrai Supabase local, temps réel compris), SQL (pgTAP : soldes et RLS). S'y ajoute une répétition automatique du jalon 4 dans un navigateur.
+- **Raison :** chaque règle importante est testée là où elle vit. Les soldes sont vérifiés en SQL, puisqu'ils y sont calculés ; la simplification en Dart, pour la même raison.
+
+### D14 — Fonctionnalité bonus
+- **Options :** notifications, graphiques, export CSV, invitation par lien, cache local, tests d'intégration.
+- **Choix :** **statistiques en graphiques** (écran « Statistiques » : total par mois, avancé par colocataire), dessinées avec de simples widgets ; nous avons aussi les tests d'intégration.
+- **Raison :** aucun paquet supplémentaire, et cela réutilise les données déjà présentes. Un seul bonus est noté (+1) : présenter les statistiques.
+
+## Pièges rencontrés (et leçon retenue)
+
+- **Ordre de tri :** dans `supabase-dart`, `.order('colonne')` trie par défaut en ordre **décroissant**. Les membres s'affichaient à l'envers. Tous les tris précisent désormais `ascending:`.
+- **Supprimer une coloc échouait :** les cascades vers `membres` et vers `depenses` s'exécutent dans un ordre non garanti. Les clés vers `membres` sont donc différées (`deferrable initially deferred`).
+- **Contrôles différés et tests SQL :** une transaction de test annulée par `ROLLBACK` ne déclenche jamais le contrôle prévu au `COMMIT`. On le force avec `SET CONSTRAINTS ALL IMMEDIATE` *après* l'appel.
+- **Accessibilité :** le bandeau « Hors connexion », dessiné avant les pages, était masqué aux lecteurs d'écran par les pages modales (`BlockSemantics`). Il est désormais dessiné après elles et déclaré comme région « vivante ».
 
 ## Points techniques du sujet (§4)
 

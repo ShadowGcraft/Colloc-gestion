@@ -15,18 +15,20 @@ class Depense {
 
   /// Ligne de `depenses` avec les parts embarquées : `*, parts:depense_parts(...)`
   factory Depense.depuisJson(Map<String, dynamic> json) => Depense(
-        id: json['id'] as String,
-        payeurId: json['payeur_id'] as String,
-        montantCentimes: (json['montant_centimes'] as num).toInt(),
-        description: json['description'] as String,
-        date: DateTime.parse(json['date_depense'] as String),
-        creePar: json['cree_par'] as String,
-        ticketChemin: json['ticket_chemin'] as String?,
-        parts: {
-          for (final p in (json['parts'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>())
-            p['utilisateur_id'] as String: (p['montant_centimes'] as num).toInt(),
-        },
-      );
+    id: json['id'] as String,
+    payeurId: json['payeur_id'] as String,
+    montantCentimes: (json['montant_centimes'] as num).toInt(),
+    description: json['description'] as String,
+    date: DateTime.parse(json['date_depense'] as String),
+    creePar: json['cree_par'] as String,
+    ticketChemin: json['ticket_chemin'] as String?,
+    parts: {
+      for (final p
+          in (json['parts'] as List<dynamic>? ?? const [])
+              .cast<Map<String, dynamic>>())
+        p['utilisateur_id'] as String: (p['montant_centimes'] as num).toInt(),
+    },
+  );
 
   final String id;
   final String payeurId;
@@ -73,13 +75,17 @@ class PhotoTicket {
 }
 
 class Solde {
-  const Solde({required this.utilisateurId, required this.centimes, required this.aQuitte});
+  const Solde({
+    required this.utilisateurId,
+    required this.centimes,
+    required this.aQuitte,
+  });
 
   factory Solde.depuisJson(Map<String, dynamic> json) => Solde(
-        utilisateurId: json['utilisateur_id'] as String,
-        centimes: (json['solde_centimes'] as num).toInt(),
-        aQuitte: json['a_quitte'] as bool,
-      );
+    utilisateurId: json['utilisateur_id'] as String,
+    centimes: (json['solde_centimes'] as num).toInt(),
+    aQuitte: json['a_quitte'] as bool,
+  );
 
   final String utilisateurId;
 
@@ -99,13 +105,13 @@ class Remboursement {
   });
 
   factory Remboursement.depuisJson(Map<String, dynamic> json) => Remboursement(
-        id: json['id'] as String,
-        debiteurId: json['debiteur_id'] as String,
-        crediteurId: json['crediteur_id'] as String,
-        montantCentimes: (json['montant_centimes'] as num).toInt(),
-        creePar: json['cree_par'] as String,
-        creeLe: DateTime.parse(json['cree_le'] as String),
-      );
+    id: json['id'] as String,
+    debiteurId: json['debiteur_id'] as String,
+    crediteurId: json['crediteur_id'] as String,
+    montantCentimes: (json['montant_centimes'] as num).toInt(),
+    creePar: json['cree_par'] as String,
+    creeLe: DateTime.parse(json['cree_le'] as String),
+  );
 
   final String id;
   final String debiteurId;
