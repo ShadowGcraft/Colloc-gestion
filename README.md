@@ -57,11 +57,11 @@ Copiez `env.example.json` en `env.json`, puis renseignez l'URL et la clé **anon
 
 ### 3. Le lancement
 
-- **Windows :** double-cliquez sur `lancer.bat`, ou tapez `lancer.bat -d chrome` dans un terminal.
+- **Windows :** double-cliquez sur `lancer.bat` : l'application de bureau Windows démarre directement. Dans un terminal : `.\lancer.bat menu` pour choisir l'appareil, ou `.\lancer.bat -d chrome`.
 - **macOS / Linux :** `./lancer.sh`, ou `./lancer.sh -d macos`.
 - **VS Code :** configuration « Colloc' » (`F5`), déjà prête dans `.vscode/launch.json`.
 
-Le lanceur vérifie Flutter, l'application et `env.json`, puis lance `flutter pub get`. Il ne propose que les appareils utilisables sur la machine :
+Le lanceur vérifie Flutter, l'application et `env.json`, puis lance `flutter pub get`. Son menu (`./lancer.sh`, `lancer.bat menu`) ne propose que les appareils utilisables sur la machine :
 - **émulateur Android**, démarré automatiquement (créez-en un dans Android Studio → *Device Manager*) ;
 - **navigateur** : Chrome ou Edge, sinon le navigateur par défaut (Safari, Firefox…), ouvert tout seul ;
 - **application de bureau** Windows, ou macOS si Xcode est installé ;

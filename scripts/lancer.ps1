@@ -1,7 +1,8 @@
 ﻿# Lanceur Colloc' pour Windows : appelé par lancer.bat (double-clic).
 #
-#   lancer.bat                 menu de choix de l'appareil
-#   lancer.bat -d windows      arguments transmis tels quels à « flutter run »
+#   lancer.bat                 application Windows (bureau) : lancer.bat transmet -d windows
+#   lancer.bat menu            menu de choix de l'appareil (ce script appelé sans argument)
+#   lancer.bat -d chrome       arguments transmis tels quels à « flutter run »
 #
 # Vérifie Flutter, le projet app\ et env.json, refuse la clé service_role,
 # puis lance l'application avec --dart-define-from-file=env.json.
