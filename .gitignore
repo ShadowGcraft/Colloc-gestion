@@ -1,0 +1,20 @@
+# ---- Secrets : ne JAMAIS committer ----
+# URL + clé anon locales (modèle : env.example.json)
+env.json
+.env
+.env.*
+*.pem
+*.key
+
+# ---- Supabase CLI (si utilisé en local) ----
+supabase/.temp/
+supabase/.branches/
+
+# ---- Systèmes et éditeurs ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.iml
+
+# Les fichiers propres à Flutter sont ignorés par app/.gitignore (créé par flutter create)
