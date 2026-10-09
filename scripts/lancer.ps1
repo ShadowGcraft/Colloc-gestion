@@ -61,20 +61,82 @@ foreach ($m in [regex]::Matches($contenu, 'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A
     }
 }
 
+$portWeb = 8080
+$urlAOuvrir = $null
+
+# Démarre (si besoin) un émulateur Android et attend qu'il soit prêt
+function Lancer-Emulateur([string[]]$emulateurs) {
+    $id = ([regex]::Match((& flutter devices 2>$null | Out-String), 'emulator-\d+')).Value
+    if (-not $id) {
+        $emulateur = $emulateurs[0]
+        if ($emulateurs.Count -gt 1) {
+            Write-Host ''
+            Write-Host 'Quel émulateur ?'
+            for ($i = 0; $i -lt $emulateurs.Count; $i++) { Write-Host "  $($i + 1)) $($emulateurs[$i])" }
+            $n = Read-Host 'Choix [1]'
+            if (-not $n) { $n = '1' }
+            if ($n -notmatch '^\d+$' -or [int]$n -lt 1 -or [int]$n -gt $emulateurs.Count) { Arreter "Choix invalide : $n" }
+            $emulateur = $emulateurs[[int]$n - 1]
+        }
+        Info "Démarrage de l'émulateur $emulateur (1 à 2 minutes la première fois)…"
+        & flutter emulators --launch $emulateur *> $null
+        for ($t = 0; $t -lt 90 -and -not $id; $t++) {
+            Start-Sleep -Seconds 2
+            $id = ([regex]::Match((& flutter devices 2>$null | Out-String), 'emulator-\d+')).Value
+        }
+        if (-not $id) { Arreter "L'émulateur ne répond pas. Ouvrez-le depuis Android Studio puis relancez." }
+    }
+
+    # détecté ne veut pas dire prêt : on attend la fin du démarrage d'Android
+    $adb = (Get-Command adb -ErrorAction SilentlyContinue).Source
+    foreach ($sdk in @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT, "$env:LOCALAPPDATA\Android\Sdk")) {
+        if (-not $adb -and $sdk -and (Test-Path (Join-Path $sdk 'platform-tools\adb.exe'))) { $adb = Join-Path $sdk 'platform-tools\adb.exe' }
+    }
+    if ($adb) {
+        Info "Attente de la fin du démarrage d'Android…"
+        for ($t = 0; $t -lt 90; $t++) {
+            if (((& $adb -s $id shell getprop sys.boot_completed 2>$null) | Out-String).Trim() -eq '1') { break }
+            Start-Sleep -Seconds 2
+        }
+    }
+    return @('-d', $id, '--device-timeout', '60')
+}
+
 if ($args.Count -gt 0) {
     $options = $args
 } else {
+    Info 'Recherche des appareils disponibles…'
+    $appareils = & flutter devices 2>$null | Out-String
+    $emulateurs = @(& flutter emulators 2>$null | ForEach-Object {
+        $colonnes = $_ -split ' • '
+        if ($colonnes.Count -ge 4 -and $colonnes[3] -match 'android') { $colonnes[0].Trim() }
+    })
+
+    # Le menu ne propose que ce qui fonctionne sur cette machine
+    $menu = @(@{ Libelle = 'Application Windows (bureau)'; Action = 'windows' })
+    if ($emulateurs.Count -gt 0) { $menu += @{ Libelle = 'Émulateur Android (démarré automatiquement)'; Action = 'emulateur' } }
+    $menu += @{ Libelle = 'Navigateur web'; Action = 'navigateur' }
+    $menu += @{ Libelle = 'Choisir parmi les appareils déjà branchés ou démarrés (téléphone Android…)'; Action = 'detectes' }
+
     Write-Host ''
     Write-Host "Sur quel appareil lancer Colloc' ?"
-    Write-Host '  1) Application Windows (bureau)'
-    Write-Host '  2) Navigateur Chrome'
-    Write-Host '  3) Choisir parmi les appareils détectés (téléphone Android, émulateur…)'
+    for ($i = 0; $i -lt $menu.Count; $i++) { Write-Host "  $($i + 1)) $($menu[$i].Libelle)" }
     $choix = Read-Host 'Choix [1]'
-    switch ($choix) {
-        { $_ -in '', '1' } { $options = @('-d', 'windows'); break }
-        '2'                { $options = @('-d', 'chrome'); break }
-        '3'                { $options = @(); break }
-        default            { Arreter "Choix invalide : $choix" }
+    if (-not $choix) { $choix = '1' }
+    if ($choix -notmatch '^\d+$' -or [int]$choix -lt 1 -or [int]$choix -gt $menu.Count) { Arreter "Choix invalide : $choix" }
+
+    switch ($menu[[int]$choix - 1].Action) {
+        'windows'    { $options = @('-d', 'windows') }
+        'emulateur'  { $options = Lancer-Emulateur $emulateurs }
+        'navigateur' {
+            if ($appareils -match '• chrome') { $options = @('-d', 'chrome') }
+            elseif ($appareils -match '• edge') { $options = @('-d', 'edge') }
+            else {
+                $options = @('-d', 'web-server', '--web-hostname', '127.0.0.1', '--web-port', "$portWeb")
+                $urlAOuvrir = "http://127.0.0.1:$portWeb"
+            }
+        }
+        'detectes'   { $options = @() }
     }
 }
 
@@ -87,6 +149,17 @@ if ($LASTEXITCODE -ne 0) { Arreter 'flutter pub get a échoué (voir les message
 if ($options -contains 'windows') {
     Write-Host "  Pour l'application Windows : Visual Studio 2022 avec « Développement Desktop en C++ »" -ForegroundColor DarkGray
     Write-Host '  et le mode développeur Windows activé (commande : start ms-settings:developers).' -ForegroundColor DarkGray
+}
+
+if ($urlAOuvrir) {
+    Info "L'application s'ouvrira dans votre navigateur ($urlAOuvrir) dès qu'elle sera compilée."
+    # attend que le serveur réponde, puis ouvre le navigateur par défaut
+    Start-Job -ScriptBlock {
+        param($url)
+        for ($t = 0; $t -lt 300; $t++) {
+            try { Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 2 | Out-Null; Start-Process $url; return } catch { Start-Sleep -Seconds 1 }
+        }
+    } -ArgumentList $urlAOuvrir | Out-Null
 }
 
 Info "Lancement de l'application…"

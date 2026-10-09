@@ -61,7 +61,13 @@ Copiez `env.example.json` en `env.json`, puis renseignez l'URL et la clé **anon
 - **macOS / Linux :** `./lancer.sh`, ou `./lancer.sh -d macos`.
 - **VS Code :** configuration « Colloc' » (`F5`), déjà prête dans `.vscode/launch.json`.
 
-Le lanceur vérifie Flutter, l'application et `env.json`, lance `flutter pub get`, propose un appareil, puis exécute `flutter run --dart-define-from-file=env.json`.
+Le lanceur vérifie Flutter, l'application et `env.json`, puis lance `flutter pub get`. Il ne propose que les appareils utilisables sur la machine :
+- **émulateur Android**, démarré automatiquement (créez-en un dans Android Studio → *Device Manager*) ;
+- **navigateur** : Chrome ou Edge, sinon le navigateur par défaut (Safari, Firefox…), ouvert tout seul ;
+- **application de bureau** Windows, ou macOS si Xcode est installé ;
+- **téléphone branché**.
+
+Il exécute ensuite `flutter run --dart-define-from-file=env.json`.
 
 **Prérequis sous Windows :**
 - Flutter dans le `PATH` (`flutter doctor`).
